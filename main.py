@@ -1,11 +1,12 @@
 #!/usr/bin/python3
 
 from collections import Counter
+import concurrent
+import concurrent.futures
 import glob
 import getopt
 import hashlib
 import os
-
 
 def onlyFiles(startdir):
     return [x for x in glob.glob(startdir+'**/*',recursive=True) if os.path.isfile(x)]
@@ -19,14 +20,15 @@ def returnFileSum(filename):
 
 def return_multiple_files(path_sum_dic):
     tmp =  Counter(path_sum_dic.values()) 
-
     tmplist = [x for x in tmp if tmp[x] > 1 ]
     tmpdic = {}
+
     for key,values in path_sum_dic.items():
         if values in tmplist:
             #print(key,values)
             tmpdic[key] = values
 
+#    print(tmpdic)
     return tmpdic
 
 def show_files(tmpdic):
@@ -39,13 +41,24 @@ def main():
 
     fileMd5Sums = [ ]
     path_sum_dic = { }
-    for paths in start:
-        #fileMd5Sums.append(returnFileSum(paths))
-        path_sum_dic[paths] = returnFileSum(paths)
-    
-    duplicate =(return_multiple_files(path_sum_dic))
-    for key,values in duplicate.items():
+    duplicate = {}
+    with concurrent.futures.ThreadPoolExecutor(10) as executor:
+        path_sum_dic = {executor.submit(returnFileSum,paths): paths for paths in start}
+        for feature in concurrent.futures.as_completed(path_sum_dic):
+            paths = path_sum_dic[feature]
+            try:
+                data = feature.result()
+            except Exception as exc:
+                print('%r generated an error %s' % (paths,exc))
+            else:
+                duplicate[paths] = data
+
+
+    onlyDuplicates = return_multiple_files(duplicate)
+
+    for key,values in onlyDuplicates.items():
         print(key,values)
+
 
 if __name__ == '__main__':
     main()
