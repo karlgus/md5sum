@@ -5,17 +5,14 @@ import concurrent
 import concurrent.futures
 import getopt
 import hashlib
-import os
 import pathlib
 
 def onlyFiles(startdir):
-#    return [x for x in glob.glob(startdir+'**/*',recursive=True) if os.path.isfile(x)]
-
-    return [x for x in pathlib.Path(startdir).cwd().rglob("*")]
+    return [x for x in pathlib.Path(startdir).rglob("*") if x.is_file()]
 
 #def checkfile(filename):
 def returnFileSum(filename):
-    with open(filename,'r') as file_to_check:
+    with open(filename,'r',errors='ignore') as file_to_check:
         data = file_to_check.read()
         md5_returned = hashlib.md5(data.encode('utf-8')).hexdigest()
         return md5_returned
@@ -39,8 +36,7 @@ def show_files(tmpdic):
 
 def main():
 
-    start = onlyFiles('/srv/Data/')
-
+    start = onlyFiles('/etc')
     fileMd5Sums = [ ]
     path_sum_dic = { }
     duplicate = {}
@@ -50,6 +46,8 @@ def main():
             paths = path_sum_dic[feature]
             try:
                 data = feature.result()
+            except PermissionError:
+                return
             except Exception as exc:
                 print('%r generated an error %s' % (paths,exc))
             else:
@@ -59,8 +57,8 @@ def main():
     onlyDuplicates = return_multiple_files(duplicate)
 
     for key,values in onlyDuplicates.items():
-        print(key,values)
-
+#        print(key,values)
+        pass
 
 if __name__ == '__main__':
     main()
