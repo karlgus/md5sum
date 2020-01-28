@@ -3,7 +3,6 @@
 from collections import Counter
 import concurrent
 import concurrent.futures
-import getopt
 import hashlib
 import pathlib
 
