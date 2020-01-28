@@ -3,13 +3,15 @@
 from collections import Counter
 import concurrent
 import concurrent.futures
-import glob
 import getopt
 import hashlib
 import os
+import pathlib
 
 def onlyFiles(startdir):
-    return [x for x in glob.glob(startdir+'**/*',recursive=True) if os.path.isfile(x)]
+#    return [x for x in glob.glob(startdir+'**/*',recursive=True) if os.path.isfile(x)]
+
+    return [x for x in pathlib.Path(startdir).cwd().rglob("*")]
 
 #def checkfile(filename):
 def returnFileSum(filename):
