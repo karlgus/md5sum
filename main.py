@@ -35,7 +35,6 @@ def show_files(tmpdic):
         print(key,values)
 
 def main():
-
     start = onlyFiles('/etc')
     fileMd5Sums = [ ]
     path_sum_dic = { }
@@ -53,12 +52,9 @@ def main():
             else:
                 duplicate[paths] = data
 
-
     onlyDuplicates = return_multiple_files(duplicate)
-
     for key,values in onlyDuplicates.items():
-#        print(key,values)
-        pass
+        print(key,values)
 
 if __name__ == '__main__':
     main()
